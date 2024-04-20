@@ -65,3 +65,31 @@ def ab_to_xy(ab: tuple[int, int], octant: int) -> tuple[int, int]:
 
     # We never get here, just to make the warning about returning from all code paths go away
     return (0, 0)
+
+
+# Geive two positions return the direction and number of units to move towards the destination
+def reverse_grad(p1: Position, p2: Position) -> tuple[int, int]:
+    dx = p2[0] - p1[0]
+    dy = p2[1] - p2[1]
+    d = int(distance(p1,p2))
+    if dx == 0:
+        dx = 1
+    if dy == 0:
+        dy = 1
+    if dx > dy and dy >= 0  and dx >= 0:
+        return (d, 1)
+    elif dy > dx and dx > 0 and dy > 0:
+        return (d, 2)
+    elif dy >= abs(dx) and dx < 0:
+        return (d, 3)
+    elif dy <= abs(dx) and dy > 0 and dx < 0:
+        return (d, 4)
+    elif dy < 0 and dx < 0 and abs(dx) >= abs(dy):
+        return (d, 5)
+    elif dy < 0 and dx < 0 and abs(dy) >= abs(dx):
+        return (d, 6)
+    elif dy < 0 and dx > 0 and abs(dy) >= dx:
+        return (d, 7)
+    elif dy < 0 and dx > 0 and abs(dx) >= abs(dy):
+        return (d, 8)
+    return (0, 0)

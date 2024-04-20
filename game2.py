@@ -38,8 +38,19 @@ def print_state(state: GameState, destination: Position, turns_left: int) -> Non
     print(state)
     print("Turns left: " + str(turns_left))
     print(f"Destination: {destination}")
+    
     for (player, position) in state.items():
+        print()
         print(f"{player}'s distance from destination: {int(distance(position, destination))}")
+        dydx = (destination[1] - position[1]) / (destination[0]-position[0])
+        print(f"{player}'s gradient with destination: {dydx:.2f}")
+        # (units, dir) = reverse_grad(position, destination)
+        # print(f"{player}'s optimal move: {units} {dir}")
+        for (player2, position2) in state.items():
+            if player2 == player:
+                continue
+            mp = ((position[0] + position2[0])/2.0, (position[1] + position2[1])/2.0)
+            print(f"{player} - {player2} midpoint = ({mp[0]:.2f}, {mp[1]:.2f})")
     print("=" * 30)
 
 # Validate input also verifying that the entered numbers are a pefect triple.
@@ -69,6 +80,7 @@ def get_player_input(player: str) -> PlayerInput:
 
 # Main function implementing the game logic.
 def main(destination: Position, max_coord: int, max_number_of_turns: int):
+    print("Generating Pythagorean triples...")
     triples = generate_triples(127, 2000)
     players = ["player1", "player2"]
     state = init_game_state(players, max_coord)
