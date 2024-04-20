@@ -93,10 +93,10 @@ def main(destination: Position, max_coord: int, max_number_of_turns: int):
             abc = closest_triple(triples_dict(triples), units) 
             print(f"Triple: {abc[0]}, {abc[1]}, {abc[2]}")
             # Map triangle sides to x,y coordinates depending on direction
-            (x, y) = ab_to_xy((abc[0], abc[1]), direction)
-            print(f"Movement: ({x}, {y})")
+            (dx, dy) = ab_to_xy((abc[0], abc[1]), direction)
+            print(f"Movement: ({dx}, {dy})")
             # Move player
-            state[player] = (position[0] + x, position[1] + y)
+            state[player] = (position[0] + dx, position[1] + dy)
         turns_left -= 1
 
     player_won = won(state, destination)
