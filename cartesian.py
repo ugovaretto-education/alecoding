@@ -2,6 +2,7 @@ from random import randint
 from math import sqrt
 
 type Position = tuple[int, int]
+type Grid = list[list[str]]
 
 # Return random 2D coordinates.
 def rand_coord(max_coord: int) -> tuple[int, int]:
@@ -93,3 +94,35 @@ def reverse_grad(p1: Position, p2: Position) -> tuple[int, int]:
     elif dy < 0 and dx > 0 and abs(dx) >= abs(dy):
         return (d, 8)
     return (0, 0)
+
+
+def add_points(p1: Position, p2: Position) -> Position:
+    return (p1[0] + p2[0], p1[1] + p2[1])
+
+
+def sub_points(p1: Position, p2: Position) -> Position:
+    return (p1[0] - p2[0], p1[1] - p2[1])
+
+def scale(p: Position, minp: Position, maxp: Position, outmin: Position, outmax: Position) -> Position:
+    p2 = sub_points(p, minp)
+    d = sub_points(maxp, minp)
+    s =  (float(p2[0]) / float(d[0]), float(p2[1])/  float(d[1]))
+    dout = sub_points(outmax, outmin)
+    return (int(s[0]*dout[0]), int(s[1]*dout[1]))
+
+def gen_grid(h: int, v: int) -> Grid:
+    g:list[list[str]] = []
+    for _ in range(h):
+        row = []
+        for _ in range(v):
+            row.append('.')
+        g.append(row)
+    return g
+
+def set_grid_elem(row: int, col: int, elem: str, grid: Grid) -> Grid:
+    grid[row][col] = elem
+    return grid
+
+def print_grid(grid: Grid) -> None:
+    for r in grid:
+        print(" ".join(r))
