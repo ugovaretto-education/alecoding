@@ -4,29 +4,23 @@
 # If after a specified number of turns no player has reached the destination the player
 # closes to the destination wins.
 
+# Add local direactory to PYTHONPATH to be able to load code from other files.
+import sys
+sys.path.insert(0,'.')
+
 from math import sqrt, inf
 from random import randint
+from cartesian import * 
+from pythagora import *
 
 # Types,
 type GameState = dict[str, tuple[int, int]]
-type Position = tuple[int, int]
-
-# Return random 2D coordinates.
-def rand_coord(max_coord: int) -> tuple[int, int]:
-    return (randint(-max_coord, max_coord), randint(-max_coord, max_coord))
-
-# Compute the square of the distance between two points (Pythagora's theorem).
-def distance_sq(a: Position, b: Position) -> float:
-    return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
-
-# Compute the distamce between two points.
-def distance(a: tuple[int, int], b: tuple[int, int]) -> float:
-    return sqrt(distance_sq(a, b))
+type PlayerInput = tuple[int, int] # units and direction
 
 # Check if a player has won by checking if the current position is same as destination.
-def won(state: dict[str, tuple[int, int]], destination: tuple[int, int]) -> str:
+def won(state: dict[str, tuple[int, int]], destination: tuple[int, int], min_dist: float = 0.0) -> str:
     for name, position in state.items():
-        if position == destination:
+        if distance(destination, position) <= min_dist:
             return name
     return ""
 
@@ -55,33 +49,42 @@ def check_input(line:str) -> bool:
     l = str.split(line)
     if len(l) != 2:
         return False
+    l = list(map(int, str.split(line)))
+    if len(l) != 2:
+        return False
+    if l[1] < 1 or l[1] > 8:
+        return False
+    if l[0] <= 0:
+        return False
     return True
 
 # Return player input as (x,y) coordinate.
-def get_player_input(player: str, position: Position, max_coord: int) -> Position:
-    line = input(f"{player}>\nEnter movement along horizontal and vertical directions as two number 'x y': ")
+def get_player_input(player: str) -> PlayerInput:
+    line = input(f"{player}>\nEnter units of movements and directions(1-8) as two numbers separated with space': ")
     if not check_input(line):
-        print("Input error, please enter two numbers between {-max_coord} and {+max_coord}")
-        get_player_input(player, position, max_coord)
+        print("Input error, please enter two numbers separated by space")
+        get_player_input(player)
     l = list(map(int, str.split(line)))
-    assert len(l) == 2
     return (l[0], l[1])
 
 # Main function implementing the game logic.
 def main(destination: Position, max_coord: int, max_number_of_turns: int):
-    players = list(str.split(input("Enter the players' names separate by ','"), ','))
-    # remove blank spaces
-    players = list(map(str.strip, players))
-    if len(players) < 2:
-        print("Please enter at least two players")
-        main(destination, max_coord, max_number_of_turns)
+    triples = generate_triples(127, 2000)
+    players = ["player1", "player2"]
     state = init_game_state(players, max_coord)
     turns_left = max_number_of_turns
     while not won(state, destination) and turns_left > 0:
         print_state(state, destination, turns_left)
         for (player, position) in state.items():
-            (new_x, new_y) = get_player_input(player, position, max_coord)
-            state[player] = (position[0] + new_x, position[1] + new_y)
+            (units, direction) = get_player_input(player)
+            # Retrieve triple with hypotenuse having length closest to units
+            abc = closest_triple(triples_dict(triples), units) 
+            print(f"Triple: {abc[0]}, {abc[1]}, {abc[2]}")
+            # Map triangle sides to x,y coordinates depending on direction
+            (x, y) = ab_to_xy((abc[0], abc[1]), direction)
+            print(f"Movement: ({x}, {y})")
+            # Move player
+            state[player] = (position[0] + x, position[1] + y)
         turns_left -= 1
 
     player_won = won(state, destination)
