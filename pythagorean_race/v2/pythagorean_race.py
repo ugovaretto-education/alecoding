@@ -595,6 +595,11 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # for player one
                 (x, y) = player_two["cartesian_coords"]
                 (new_x, new_y) = (x + dx, y + dy)
+                if (new_x <= -MAX_COORD or new_x >= MAX_COORD
+                    or new_y <= -MAX_COORD or new_y >= MAX_COORD):
+                    print("Distance too large, position out of bound")
+                    print("Enter new values (press mouse button again)")
+                    continue 
                 player_two["cartesian_coords"] = (new_x, new_y)
                 player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
                 dest = destination["cartesian_coords"]
