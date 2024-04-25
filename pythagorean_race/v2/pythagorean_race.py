@@ -239,10 +239,12 @@ def conv_cartesian_to_pygame_coords(x, y):
     return (pygame_x, pygame_y)
 
 
+MAX_COORD = 400
+
 def initialise_entities():
     # initially set the requested coordinates to random values
     # each time you call randint() you get new random coords
-    p1_rand_x, p1_rand_y = random.randint(-400, 400), random.randint(-400, 400)
+    p1_rand_x, p1_rand_y = random.randint(-MAX_COORD, MAX_COORD), random.randint(-MAX_COORD, MAX_COORD)
     player_one["cartesian_coords"] = (
         p1_rand_x,
         p1_rand_y,
@@ -251,13 +253,11 @@ def initialise_entities():
         p1_rand_x, p1_rand_y
     )  # convert and store pygame coordinates
 
-    p2_rand_x, p2_rand_y = random.randint(-400, 400), random.randint(-400, 400)
+    p2_rand_x, p2_rand_y = random.randint(-MAX_COORD, MAX_COORD), random.randint(-MAX_COORD, MAX_COORD)
     player_two["cartesian_coords"] = (p2_rand_x, p2_rand_y)
-    player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(
-        p2_rand_x, p2_rand_y)
+    player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(p2_rand_x, p2_rand_y)
 
-    dest_rand_x, dest_rand_y = random.randint(
-        -400, 400), random.randint(-400, 400)
+    dest_rand_x, dest_rand_y = random.randint(-MAX_COORD, MAX_COORD), random.randint(-MAX_COORD, MAX_COORD)
     destination["cartesian_coords"] = (dest_rand_x, dest_rand_y)
     destination["pygame_coords"] = conv_cartesian_to_pygame_coords(
         dest_rand_x, dest_rand_y
@@ -307,15 +307,16 @@ destination = {
 
 
 def print_status(player):
-    return
     print()
     print(player["name"])
-    print(f"Location: {player['cartesian_coords']:.1f}")
+    (x, y) = player['cartesian_coords']
+    print(f"Location: ({x:.1f}, {y:.1f}")
     print(f"Distance to destination: {player['distance_from_dest']:.1f} units")
     print(f"Gradient: {player['gradient']:.1f}")
-    msg = f"Midpoint with Player Two: {player['midpoint']}"
+    (x, y) = player['midpoint']
+    msg = f"Midpoint with Player Two: ({x:.1f},{y:.1f})"
     if player["name"] == "Player Two":
-        msg = f"Midpoint with Player One: {player['midpoint']}"
+        msg = f"Midpoint with Player One: ({x:.1f},{y:.1f})"
     print(msg)
 
 
@@ -384,6 +385,7 @@ def select_triple_simple(
 
 
 def select_coordinates(ab: tuple[int, int], octant: int) -> tuple[int, int]:
+    assert octant >= 1 and octant <= 8
     a, b = ab
 
     if octant == 1:  # 0-45 degrees
@@ -443,15 +445,13 @@ def distance(p1: tuple[int, int], p2: tuple[int, int]) -> float:
 def check_winner(winning_player, other_player) -> bool:
     min_dist = destination["space_buffer"]
     # distance between player and destination
-    d = distance(destination["cartesian_coords"],
-                 winning_player["cartesian_coords"])
+    d = distance(destination["cartesian_coords"], winning_player["cartesian_coords"])
     # check if distance between player and destination is smaller than
     # destination buffer size
     if d <= min_dist:
         return True
 
-    d = distance(winning_player["cartesian_coords"],
-                 other_player["cartesian_coords"])
+    d = distance(winning_player["cartesian_coords"], other_player["cartesian_coords"])
 
     if d <= other_player["space_buffer"]:
         return True
@@ -459,10 +459,9 @@ def check_winner(winning_player, other_player) -> bool:
     return False
 
 
-# Compute the direction from point 1 to point 2 by subtracting the x and y
-# coordinates.
-def gradient(p1: tuple[int, int], p2: tuple[int, int]) -> tuple[int, int]:
-    return (p2[0] - p1[0], p2[1] - p1[1])
+# Compute the gradient as ratio of difference between y coordinates and x coordinates.
+def gradient(p1: tuple[int, int], p2: tuple[int, int]) -> float:
+    return (p2[1] - p1[1]) / (p2[0] - p1[0])
 
 
 # Compute the mid point between two points
@@ -473,8 +472,37 @@ def midpoint(p1: tuple[int, int], p2: tuple[int, int]) -> tuple[int, int]:
     y = (p1[1] + p2[1]) // 2
     return (x, y)
 
+# Check if input is correct.
+# Input is correct if the text contains two numbers, the direction value
+# is between 1 and 8 and the distance is greater than zero.
+# We are not checking if the player can move in a specific direction by the
+# passed amount and stay within the window boundary; such check if performed
+# when the player moves. 
+def validate_input(text: str) -> bool:
+    # split string containing multiple elements separated by space into
+    # array of elements
+    values = text.split(' ')
+    # check that we have two values
+    if len(values) < 2:
+        return False
+    try:
+        # check that the text elements can be converted to integer;
+        # if not possible to convert to integers an exception is thrown
+        distance = int(values[0])
+        direction = int(values[1])
+        # check that direction is valid
+        if direction < 1 or direction > 8:
+            return False
+        # check that distance is greated than zero
+        if distance <= 0:
+            return False
+        return True
+    except:
+        # if we jump to here is because the passed text does not contain
+        # two numbers
+        return False
+    
 
-MIN_DIST = 10
 # GAME LOOP #
 while True:  # The gameplay happens in here. Infinite loop until the user quits or a
     # player wins"
@@ -497,11 +525,14 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # coordinates (for you, you must ask for distance and
                 # direction!)
 
-                dist, direction = input(
-                    "Player 1> Enter new distance/amount you want to move and direction (which way). Make sure to do it in this order, with a space in between: "
-                ).split(
-                    ","
-                )  # You neeed to ask for distance and direction
+                player_input = input(
+                    "Player 1> Enter new distance/amount you want to move and direction (which way) as two numbers separated by space: "
+                )                
+                if not validate_input(player_input):
+                    print("Error, enter values again (press the mouse button again)")
+                    continue
+                dist, direction = player_input.split(" ")  
+                # You neeed to ask for distance and direction
                 dist = int(dist)
                 direction = int(direction)
                 # convert triple list to dict
@@ -517,9 +548,15 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # update the position and other parameters in the dictionary
                 # for player one
                 (x, y) = player_one["cartesian_coords"]
-                player_one["cartesian_coords"] = (x + dx, y + dy)
-                player_one["pygame_coords"] = conv_cartesian_to_pygame_coords(
-                    x, y)
+                (new_x, new_y) = (x + dx, y + dy)
+                # check if new position is within boundaries, if not
+                if (new_x <= -MAX_COORD or new_x >= MAX_COORD
+                    or new_y <= -MAX_COORD or new_y >= MAX_COORD):
+                    print("Distance too large, position out of bound")
+                    print("Enter new values (press mouse button again)")
+                    continue 
+                player_one["cartesian_coords"] = (new_x, new_y)
+                player_one["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
                 dest = destination["cartesian_coords"]
                 min_dist = destination["space_buffer"]
                 if check_winner(player_one, player_two):
@@ -527,18 +564,19 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                     break
                 position = player_one["cartesian_coords"]
                 player_one["distance_from_dest"] = distance(position, dest)
-                g = gradient(position, dest)
-                gradient_length = math.sqrt(g[0] * g[0] + g[1] * g[1])
-                player_one["gradient"] = gradient_length
+                player_one["gradient"] = gradient(position, dest)
                 position2 = player_two["cartesian_coords"]
                 player_one["midpoint"] = midpoint(position, position2)
                 print_status(player_one)
             elif right_button:
-                dist, direction = input(
-                    "Player 2> Enter new distance and direction: "
-                ).split(
-                    ","
-                )  # You neeed to ask for distance and direction
+                player_input = input(
+                    "Player 2> Enter new distance/amount you want to move and direction (which way) as two numbers separated by space: "
+                )
+                if not validate_input(player_input):
+                    print("Error, enter the values again (press the mouse button again)")
+                    continue
+                dist, direction = player_input.split(" ") 
+                # You neeed to ask for distance and direction
                 dist = int(dist)
                 direction = int(direction)
                 # convert triple list to dict
@@ -554,9 +592,9 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # update the position and other parameters in the dictionary
                 # for player one
                 (x, y) = player_two["cartesian_coords"]
-                player_two["cartesian_coords"] = (x + dx, y + dy)
-                player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(
-                    x, y)
+                (new_x, new_y) = (x + dx, y + dy)
+                player_two["cartesian_coords"] = (new_x, new_y)
+                player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
                 dest = destination["cartesian_coords"]
                 min_dist = destination["space_buffer"]
                 if check_winner(player_two, player_one):
@@ -564,9 +602,7 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                     break
                 position = player_two["cartesian_coords"]
                 player_two["distance_from_dest"] = distance(position, dest)
-                g = gradient(position, dest)
-                gradient_length = math.sqrt(g[0] * g[0] + g[1] * g[1])
-                player_two["gradient"] = gradient_length
+                player_two["gradient"] = gradient(position, dest)
                 position1 = player_one["cartesian_coords"]
                 player_two["midpoint"] = midpoint(position, position1)
                 print_status(player_two)
