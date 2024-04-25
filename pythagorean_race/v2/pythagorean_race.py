@@ -269,9 +269,11 @@ def initialise_entities():
 
 # ********** MAIN PROGRAM ************* #
 
-destination_buffer = 10
-player1_buffer = 10
-player2_buffer = 10
+MAX_BUFFER_RADIUS = 10
+
+destination_buffer = MAX_BUFFER_RADIUS 
+player1_buffer = MAX_BUFFER_RADIUS
+player2_buffer = MAX_BUFFER_RADIUS
 
 
 player_one = {
@@ -305,7 +307,7 @@ destination = {
     "space_buffer": destination_buffer,
 }
 
-
+# Print information about player.
 def print_status(player):
     print()
     print(player["name"])
