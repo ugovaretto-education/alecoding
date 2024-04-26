@@ -546,6 +546,7 @@ def update_player_status(player, other_player, distance, direction) -> bool:
 # GAME LOOP #
 while True:  # The gameplay happens in here. Infinite loop until the user quits or a
     # player wins"
+    current_player = None # 1 if player one, 2 if player two
     for (
         event
     ) in (
@@ -564,7 +565,7 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # if the left button was pressed, ask for player 1 new
                 # coordinates (for you, you must ask for distance and
                 # direction!)
-
+                current_player = 1
                 # start counting time, after timer_interval milliseconds
                 # an event is sent to this loop
                 pygame.time.set_timer(timer_event , timer_interval)
@@ -572,47 +573,22 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 player_input = input(
                     "Player 1> Enter new distance/amount you want to move and direction (which way) as two numbers separated by space: "
                 )                
+                
+                dist, direction = player_input.split(" ")  
                 if not validate_input(player_input):
                     print("Error, enter values again (press the mouse button again)")
                     continue
-                dist, direction = player_input.split(" ")  
                 # You neeed to ask for distance and direction
                 dist = int(dist)
                 direction = int(direction)
-                # convert triple list to dict
-                tri_dict = triples_dict(triples)
-                # select the triple with the hypothenuse length as close as
-                # possible to the 'direction' number
-                triple = select_triple(tri_dict, dist)
-                # extract the first two numbers of the triple
-                (a, b, _) = triple
-                # select which of the two numbers to use for X and which for Y
-                # and decide if you need to add a minus sign
-                (dx, dy) = select_coordinates((a, b), direction)
-                # update the position and other parameters in the dictionary
-                # for player one
-                (x, y) = player_one["cartesian_coords"]
-                (new_x, new_y) = (x + dx, y + dy)
-                # check if new position is within boundaries, if not
-                if (new_x <= -MAX_COORD or new_x >= MAX_COORD
-                    or new_y <= -MAX_COORD or new_y >= MAX_COORD):
-                    print("Distance too large, position out of bound")
-                    print("Enter new values (press mouse button again)")
-                    continue # go back to beginning of while loop 
-                player_one["cartesian_coords"] = (new_x, new_y)
-                player_one["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
-                dest = destination["cartesian_coords"]
-                min_dist = destination["space_buffer"]
+                if not update_player_status(player_one, player_two, dist, direction):
+                    continue
                 if check_winner(player_one, player_two):
                     print("Player 1 won")
                     break
-                position = player_one["cartesian_coords"]
-                player_one["distance_from_dest"] = distance(position, dest)
-                player_one["gradient"] = gradient((x, y), (new_x, new_y))
-                position2 = player_two["cartesian_coords"]
-                player_one["midpoint"] = midpoint(position, position2)
                 print_status(player_one)
             elif right_button:
+                current_player = 2
                 player_input = input(
                     "Player 2> Enter new distance/amount you want to move and direction (which way) as two numbers separated by space: "
                 )
@@ -623,40 +599,26 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # You neeed to ask for distance and direction
                 dist = int(dist)
                 direction = int(direction)
-                # convert triple list to dict
-                tri_dict = triples_dict(triples)
-                # select the triple with the hypothenuse length as close as
-                # possible to the 'dist' number
-                triple = select_triple(tri_dict, dist)
-                # extract the first two numbers of the triple
-                (a, b, _) = triple
-                # select which of the two numbers to use for X and which for Y
-                # and decide if you need to add a minus sign
-                (dx, dy) = select_coordinates((a, b), direction)
-                # update the position and other parameters in the dictionary
-                # for player one
-                (x, y) = player_two["cartesian_coords"]
-                (new_x, new_y) = (x + dx, y + dy)
-                if (new_x <= -MAX_COORD or new_x >= MAX_COORD
-                    or new_y <= -MAX_COORD or new_y >= MAX_COORD):
-                    print("Distance too large, position out of bound")
-                    print("Enter new values (press mouse button again)")
-                    continue # go back to beginning of while loop 
-                player_two["cartesian_coords"] = (new_x, new_y)
-                player_two["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
-                dest = destination["cartesian_coords"]
-                min_dist = destination["space_buffer"]
+                if not update_player_status(player_two, player_one, dist, direction):
+                    continue
                 if check_winner(player_two, player_one):
-                    print("Player 2 won")
+                    print("Player 1 won")
                     break
-                position = player_two["cartesian_coords"]
-                player_two["distance_from_dest"] = distance(position, dest)
-                player_two["gradient"] = gradient((x, y), (new_x, new_y))
-                position1 = player_one["cartesian_coords"]
-                player_two["midpoint"] = midpoint(position, position1)
                 print_status(player_two)
         elif event.type == timer_event:
-            pass
+            # if timer event received it means player took too long to enter the
+            # input: select random direction and movement
+            triple = random.randint(0, len(triples) - 1)
+            dist = triple[2] # hypotenuse
+            #WARNING: the random distance might be to large, not dealing with it
+            # right now
+            direction = random.randint(1, 8)
+            if current_player == 1:
+                update_player_status(player_one, player_two, dist, direction)
+            elif current_player == 2:
+                update_player_status(player_two, player_one, dist, direction)
+            # reset timer
+            pygame.time.set_timer(timer_event , 0)
 
     app_surf_update(
         destination, player_one, player_two
