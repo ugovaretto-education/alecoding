@@ -312,7 +312,7 @@ def print_status(player):
     print()
     print(player["name"])
     (x, y) = player['cartesian_coords']
-    print(f"Location: ({x:.1f}, {y:.1f}")
+    print(f"Location: ({x}, {y})")
     print(f"Distance to destination: {player['distance_from_dest']:.1f} units")
     print(f"Gradient: {player['gradient']:.1f}")
     (x, y) = player['midpoint']
@@ -566,7 +566,7 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                     break
                 position = player_one["cartesian_coords"]
                 player_one["distance_from_dest"] = distance(position, dest)
-                player_one["gradient"] = gradient(position, dest)
+                player_one["gradient"] = gradient((x, y), (new_x, new_y))
                 position2 = player_two["cartesian_coords"]
                 player_one["midpoint"] = midpoint(position, position2)
                 print_status(player_one)
@@ -609,7 +609,7 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                     break
                 position = player_two["cartesian_coords"]
                 player_two["distance_from_dest"] = distance(position, dest)
-                player_two["gradient"] = gradient(position, dest)
+                player_two["gradient"] = gradient((x, y), (new_x, new_y))
                 position1 = player_one["cartesian_coords"]
                 player_two["midpoint"] = midpoint(position, position1)
                 print_status(player_two)
