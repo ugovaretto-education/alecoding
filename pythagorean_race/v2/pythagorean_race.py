@@ -505,6 +505,43 @@ def validate_input(text: str) -> bool:
         # two numbers
         return False
     
+TIME_INTERVAL = 5000 # 5 seconds
+timer_interval = TIME_INTERVAL
+timer_event = pygame.USEREVENT + 1
+
+# Update player data, all input has been validated before calling this function
+# The function returns True if data were updated, False in case of errors.
+def update_player_status(player, other_player, distance, direction) -> bool:
+   # convert triple list to dict
+    tri_dict = triples_dict(triples)
+    # select the triple with the hypothenuse length as close as
+    # possible to the 'direction' number
+    triple = select_triple(tri_dict, dist)
+    # extract the first two numbers of the triple
+    (a, b, _) = triple
+    # select which of the two numbers to use for X and which for Y
+    # and decide if you need to add a minus sign
+    (dx, dy) = select_coordinates((a, b), direction)
+    # update the position and other parameters in the dictionary
+    # for player one
+    (x, y) = player["cartesian_coords"]
+    (new_x, new_y) = (x + dx, y + dy)
+    # check if new position is within boundaries, if not
+    if (new_x <= -MAX_COORD or new_x >= MAX_COORD
+        or new_y <= -MAX_COORD or new_y >= MAX_COORD):
+        print("Distance too large, position out of bound")
+        print("Enter new values (press mouse button again)")
+        return False # go back to beginning of while loop 
+    player["cartesian_coords"] = (new_x, new_y)
+    player["pygame_coords"] = conv_cartesian_to_pygame_coords(new_x, new_y)
+    dest = destination["cartesian_coords"]
+    min_dist = destination["space_buffer"]
+    position = player["cartesian_coords"]
+    player["distance_from_dest"] = distance(position, dest)
+    player["gradient"] = gradient((x, y), (new_x, new_y))
+    position2 = other_player["cartesian_coords"]
+    player["midpoint"] = midpoint(position, position2) 
+    return True
 
 # GAME LOOP #
 while True:  # The gameplay happens in here. Infinite loop until the user quits or a
@@ -527,6 +564,10 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 # if the left button was pressed, ask for player 1 new
                 # coordinates (for you, you must ask for distance and
                 # direction!)
+
+                # start counting time, after timer_interval milliseconds
+                # an event is sent to this loop
+                pygame.time.set_timer(timer_event , timer_interval)
 
                 player_input = input(
                     "Player 1> Enter new distance/amount you want to move and direction (which way) as two numbers separated by space: "
@@ -614,6 +655,8 @@ while True:  # The gameplay happens in here. Infinite loop until the user quits 
                 position1 = player_one["cartesian_coords"]
                 player_two["midpoint"] = midpoint(position, position1)
                 print_status(player_two)
+        elif event.type == timer_event:
+            pass
 
     app_surf_update(
         destination, player_one, player_two
