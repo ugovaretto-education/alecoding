@@ -461,7 +461,8 @@ def check_winner(winning_player, other_player) -> bool:
     return False
 
 
-# Compute the gradient as ratio of difference between y coordinates and x coordinates.
+# Compute the gradient as ratio of differences between y coordinates and x
+# coordinates.
 def gradient(p1: tuple[int, int], p2: tuple[int, int]) -> float:
     return (p2[1] - p1[1]) / (p2[0] - p1[0])
 
