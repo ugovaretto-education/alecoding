@@ -33,10 +33,12 @@ class Coin(arcade.Sprite):
         """Update the ball's position."""
         # Calculate a new x, y
         self.center_x = (
-            self.circle_radius * math.sin(self.circle_angle) + self.circle_center_x
+            self.circle_radius *
+            math.sin(self.circle_angle) + self.circle_center_x
         )
         self.center_y = (
-            self.circle_radius * math.cos(self.circle_angle) + self.circle_center_y
+            self.circle_radius *
+            math.cos(self.circle_angle) + self.circle_center_y
         )
 
         # Increase the angle in prep for the next round.
@@ -81,7 +83,8 @@ class MyGame(arcade.Window):
 
             # Create the coin instance
             # Coin image from kenney.nl
-            coin = Coin(":resources:images/items/coinGold.png", SPRITE_SCALING / 3)
+            coin = Coin(":resources:images/items/coinGold.png",
+                        SPRITE_SCALING / 3)
 
             # Position the center of the circle the coin will orbit
             coin.circle_center_x = random.randrange(SCREEN_WIDTH)

@@ -69,7 +69,8 @@ class MyGame(arcade.Window):
 
             # Create the coin instance
             # Coin image from kenney.nl
-            coin = (":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            coin = arcade.Sprite(
+                ":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
 
             # Position the coin
             coin.center_x = random.randrange(SCREEN_WIDTH)
@@ -112,7 +113,6 @@ class MyGame(arcade.Window):
 
 
 def main():
-    foo()
     """Main function"""
     window = MyGame()
     window.setup()
