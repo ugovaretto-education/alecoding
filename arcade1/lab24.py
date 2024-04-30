@@ -95,11 +95,26 @@ class MyGame(arcade.Window):
         self.gun_sound = arcade.load_sound(":resources:sounds/hurt5.wav")
         self.hit_sound = arcade.load_sound(":resources:sounds/hit5.wav")
 
-        arcade.set_background_color(arcade.color.AMAZON)
+        arcade.set_background_color = None
+        self.background = None
+
+    def position_coins(self):
+        for c in self.coin_list:
+
+            # Create the coin instance
+            # Coin image from kenney.nl
+            # Position the coin
+            c.circle_center_x = random.randrange(SCREEN_WIDTH)
+            c.circle_center_y = random.randrange(120, SCREEN_HEIGHT)
+
+            # Random radius from 10 to 200
+            c.circle_radius = random.randrange(10, SCREEN_WIDTH // 4)
 
     def setup(self):
         """ Set up the game and initialize the variables. """
 
+        self.background = arcade.load_texture("5.png")
+        assert self.background
         # Sprite lists
         self.player_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
@@ -126,23 +141,22 @@ class MyGame(arcade.Window):
             coin.circle_center_y = random.randrange(120, SCREEN_HEIGHT)
 
             # Random radius from 10 to 200
-            coin.circle_radius = random.randrange(10, 200)
+            coin.circle_radius = random.randrange(10, SCREEN_WIDTH // 4)
 
             # Random start angle from 0 to 2pi
             coin.circle_angle = random.random() * 2 * math.pi
             # Add the coin to the lists
             self.coin_list.append(coin)
 
-        # Set the background color
-        arcade.set_background_color(arcade.color.AMAZON)
-
     def on_draw(self):
         """
         Render the screen.
         """
-
         # This command has to happen before we start drawing
         self.clear()
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background)
 
         # Draw all the sprites.
         self.coin_list.draw()
@@ -158,6 +172,7 @@ class MyGame(arcade.Window):
         Called whenever the mouse moves.
         """
         self.player_sprite.center_x = x
+        self.player_sprite.center_y = y
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -182,6 +197,19 @@ class MyGame(arcade.Window):
 
         # Add the bullet to the appropriate lists
         self.bullet_list.append(bullet)
+
+    def on_key_press(self, key, modifier):
+        if key == arcade.key.F:
+            # User hits f. Flip between full and not full screen.
+            self.set_fullscreen(not self.fullscreen)
+
+            # Get the window coordinates. Match viewport to window coordinates
+            # so there is a one-to-one mapping.
+            global SCREEN_WIDTH
+            global SCREEN_HEIGHT
+            SCREEN_WIDTH, SCREEN_HEIGHT = self.get_size()
+            self.set_viewport(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT)
+            self.position_coins()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -212,6 +240,14 @@ class MyGame(arcade.Window):
             # If the bullet flies off-screen, remove it.
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
+
+        hit_list = arcade.check_for_collision_with_list(
+            self.player_sprite, self.coin_list)
+
+        if len(hit_list) > 0:
+            arcade.play_sound(self.hit_sound)
+            print("YOU WERE HIT! GAME OVER")
+            self.close()
 
 
 def main():
