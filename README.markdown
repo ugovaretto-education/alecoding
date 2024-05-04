@@ -28,11 +28,10 @@ export PYTHONPATH=`pwd`/lib/python3.12/site-packages
 Fish:
 
 ```sh
-set -g PYTHONPATH=(pwd)/lib/python3.12/site-packages
+set -gx PYTHONPATH (pwd)/lib/python3.12/site-packages
 ```
-
-Note that if *fish* is called from within bash/zsh the `PYTHONPATH` variable
-needs to be set in the parent shell.
+* *g* = global
+* *x* = child processes (e.g. vim)
 
 ## Editor
 
@@ -42,4 +41,3 @@ If neovim is used install the following packages:
 * mypy
 * isort
 
-The pyright package 

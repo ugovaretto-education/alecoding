@@ -2,9 +2,9 @@
 
 To create a package:
 
-1. Create diectory
+1. Create directory
 2. Create file `__init__.py` in directory
-3. Create pyton files in directory
+3. Create python files in directory
 4. In `__init__.py` import the entire file/module or the symbols needed prefixing the name with '`.`'
 
 

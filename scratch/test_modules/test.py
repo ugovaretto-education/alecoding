@@ -13,6 +13,10 @@ import mroot.child2 as c2
 mroot.root_fun()
 c1.child1_fun()
 c2.child2_fun()
+
+c1.child1_invoke_root()
+c1.child1_invoke_child2()
+
 # mroot.missing_child.not_reachable()
 # from mroot import *
 #
