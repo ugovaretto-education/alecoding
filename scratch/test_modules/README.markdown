@@ -1,0 +1,16 @@
+# Python packages
+
+To create a package:
+
+1. Create diectory
+2. Create file `__init__.py` in directory
+3. Create pyton files in directory
+4. In `__init__.py` import the entire file/module or the symbols needed prefixing the name with '`.`'
+
+
+To create sub-packages:
+
+Repeat the above process inside the root directory of the main package.
+
+Each subpackage can be accesses with the fully qulified name of the path to the
+subpackage, e.g. `root.child1.child1_1`.
