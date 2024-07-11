@@ -1,4 +1,4 @@
-# iterators & exceptions
+# iterators, exceptions and generators
 
 # Exceptions are signals emitted by prefixing
 # the signal name with the 'raise' statement
@@ -87,3 +87,28 @@ def while_next_iteration():
 
 # once the iteration is completed the iteration
 # object cannot be used anymore
+
+# Generators
+# Generators are functions that act as iterators
+# using the 'yield' keyword to stop and return a value
+# each time their are invoked. The state is frozen at each 'yield'
+# invocation and the next time the function is called execution restart
+# from where it stopped.
+
+def left_shift_str(string: str):
+    for i in range(0, len(string)):
+        # concatenate last part of string after index
+        # with first part of string achieving a left shift
+        # operation
+        yield string[i:] + string[:i]
+
+
+def iterate_with_generator():
+    s = "1234567"
+    # generate a sequence-like object
+    # behind the scenes this is turned into an object
+    # that has an __iter__ and __next__ method as a regular
+    # iterator
+    sequence = left_shift_str(s)
+    for i in sequence:
+        print(i)
