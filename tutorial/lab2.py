@@ -9,4 +9,4 @@ def call_double(v: float) -> None:
 
 
 if __name__ == "__main__":
-    call_double()
+    call_double(3.1)

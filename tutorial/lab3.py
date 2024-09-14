@@ -16,6 +16,9 @@ def print_first_element(alist: list) -> None:
 
 def print_last_element(alist: list) -> None:
     print(alist[len(alist) - 1])
+    # when using a negative number it means the distance from the end
+    # -1 is the last element
+    print(alist[-1])
 
 
 def print_element_at_index(alist: list, index: int) -> None:
