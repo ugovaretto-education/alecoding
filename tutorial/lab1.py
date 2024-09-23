@@ -10,6 +10,19 @@ decimal_var: float = -12.12345
 print(f"{int_var} {str_var} {decimal_var}")
 
 
+def foo(an_argument: int):
+    print(an_argument)
+
+
+foo(10)
+
+
+def move_forward():
+    print("Move Forward")
+
+
+move_forward()
+
 # list
 # A list is a collection of elements of the same type
 alist = [1, 4, 5]
